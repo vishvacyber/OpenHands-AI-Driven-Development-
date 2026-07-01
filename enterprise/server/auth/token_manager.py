@@ -2,17 +2,43 @@ import asyncio
 import base64
 import json
 import time
+from typing import TYPE_CHECKING
 from urllib.parse import parse_qs
 
 import httpx
 import jwt
 from jwt.exceptions import DecodeError
-from keycloak.exceptions import (
-    KeycloakAuthenticationError,
-    KeycloakConnectionError,
-    KeycloakError,
-    KeycloakPostError,
-)
+
+if TYPE_CHECKING:
+    from keycloak.exceptions import (
+        KeycloakAuthenticationError,
+        KeycloakConnectionError,
+        KeycloakError,
+        KeycloakPostError,
+    )
+else:
+    try:
+        from keycloak.exceptions import (
+            KeycloakAuthenticationError,
+            KeycloakConnectionError,
+            KeycloakError,
+            KeycloakPostError,
+        )
+    except ModuleNotFoundError:  # pragma: no cover - optional dependency in OSS tests
+
+        class KeycloakError(Exception):
+            pass
+
+        class KeycloakAuthenticationError(KeycloakError):
+            pass
+
+        class KeycloakConnectionError(KeycloakError):
+            pass
+
+        class KeycloakPostError(KeycloakError):
+            pass
+
+
 from pydantic import BaseModel
 from server.auth.auth_error import ExpiredError
 from server.auth.constants import (
